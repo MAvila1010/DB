@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Read the original Excel file
-df = pd.read_excel("Wrapped.xlsx")
+df = pd.read_excel("Bare.xlsx")
 
 # Drop empty rows
 df = df.dropna(subset=['Number_of_Tiles', 'Vendor_Plate_Number'])
