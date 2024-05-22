@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Read the original Excel file
-df = pd.read_excel("320BC161016_Old.xlsx")
+df = pd.read_excel("FILENAME_OLD_FORMAT.xlsx")
 
 # Drop empty rows
 df = df.dropna(subset=['Number_of_Tiles', 'Vendor_Plate_Number'])
@@ -30,7 +30,7 @@ df['PRODUCTION_DATE'] = df['Date_Produced'].dt.strftime('%Y-%m-%d')
 df = df[['LABEL_TYPECODE', 'BATCH_NUMBER', 'SERIAL_NUMBER', 'BARCODE', 'LOCATION', 'INSTITUTION', 'MANUFACTURER', 'NAME_LABEL', 'PRODUCTION_DATE']]
 
 # Write the transformed data to a new Excel file
-df.to_excel("320BC161016.xlsx", index=False)
+df.to_excel("FILENAME_NEW_FORMAT.xlsx", index=False)
 
 
 
