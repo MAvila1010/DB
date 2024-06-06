@@ -102,7 +102,7 @@ class ModuleAssemblyGUI:
         col = idx % 8
         text = var.get()
         if len(text) >= 15:
-            formatted_text = f"{text[5:7]}\n{text[7:11]}\n{text[11]}\n{text[12:15]}"
+            formatted_text = f"{text[5:7]}\n{text[7:11]}\n{text[11]} {text[12:15]}"
             self.squares[row][col].config(text=formatted_text)
         else:
             self.squares[row][col].config(text=text)
@@ -137,6 +137,18 @@ class ModuleAssemblyGUI:
             if not var.get():
                 messagebox.showerror("Error", "Missing Tiles")
                 return
+
+        # Check if the preparation date is filled
+        if not self.prep_date_var.get().strip():
+            messagebox.showerror("Error", "Preparation date is missing.")
+            return
+
+        # Check for duplicate barcodes in other files
+        duplicate_info = self.check_for_duplicate_barcodes()
+        if duplicate_info:
+            duplicate_barcode, filename = duplicate_info
+            messagebox.showerror("Error", f"Duplicate barcode found: {duplicate_barcode} in file {filename}")
+            return
 
         # Get the filename
         filename = self.filename_var.get().strip()
@@ -197,7 +209,6 @@ class ModuleAssemblyGUI:
             with open(filename + ".csv", 'r', newline='') as file:
                 reader = csv.reader(file)
                 data = list(reader)
-
             if len(data) > 1:
                 # Tile Board Barcode
                 tile_board_barcode = data[1][0]
@@ -215,6 +226,22 @@ class ModuleAssemblyGUI:
                 # Assembly Date
                 assembly_date = data[1][3]
                 self.assembly_date_var.set(assembly_date)
+
+    def check_for_duplicate_barcodes(self):
+        current_board = self.filename_var.get().strip() + ".csv"
+        barcodes = set(var.get().strip() for var in self.input_vars)
+
+        for file in os.listdir("."):
+            if file.endswith(".csv") and file != current_board:
+                with open(file, 'r', newline='') as f:
+                    reader = csv.reader(f)
+                    data = list(reader)
+                    for row in data[2:]:
+                        if len(row) > 1:
+                            barcode = row[1].strip()
+                            if barcode in barcodes:
+                                return barcode, file
+        return None
 
 if __name__ == "__main__":
     root = tk.Tk()
