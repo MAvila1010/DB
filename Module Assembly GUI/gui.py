@@ -62,6 +62,10 @@ class ModuleAssemblyGUI:
             entry.grid(row=i % 32 + 3, column=i // 32, padx=5, pady=2, sticky="nsew")
             self.input_vars.append(var)
             self.inputs.append(entry)
+
+            # Bind events to change square color on hover
+            entry.bind("<Enter>", lambda event, idx=i: self.highlight_square(idx))
+            entry.bind("<Leave>", lambda event, idx=i: self.reset_square(idx))
         
         # Preparation Date
         self.prep_date_label = tk.Label(root, text="Preparation Date")
@@ -108,6 +112,19 @@ class ModuleAssemblyGUI:
         else:
             self.squares[row][col]['bg'] = 'red'
 
+    def highlight_square(self, idx):
+        row = idx // 8
+        col = idx % 8
+        self.squares[row][col]['bg'] = 'yellow'
+
+    def reset_square(self, idx):
+        row = idx // 8
+        col = idx % 8
+        if self.input_vars[idx].get():
+            self.squares[row][col]['bg'] = 'green'
+        else:
+            self.squares[row][col]['bg'] = 'red'
+
     def set_prep_date(self):
         self.prep_date_var.set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
@@ -120,6 +137,17 @@ class ModuleAssemblyGUI:
             if not var.get():
                 messagebox.showerror("Error", "Missing Tiles")
                 return
+
+        # Check if the preparation date is filled
+        if not self.prep_date_var.get().strip():
+            messagebox.showerror("Error", "Preparation date is missing.")
+            return
+
+        # Check for duplicate barcodes in other files
+        duplicate_barcode = self.check_for_duplicate_barcodes()
+        if duplicate_barcode:
+            messagebox.showerror("Error", f"Duplicate barcode found: {duplicate_barcode}")
+            return
 
         # Get the filename
         filename = self.filename_var.get().strip()
@@ -198,6 +226,22 @@ class ModuleAssemblyGUI:
                 # Assembly Date
                 assembly_date = data[1][3]
                 self.assembly_date_var.set(assembly_date)
+
+    def check_for_duplicate_barcodes(self):
+        current_board = self.filename_var.get().strip() + ".csv"
+        barcodes = set(var.get().strip() for var in self.input_vars)
+
+        for file in os.listdir("."):
+            if file.endswith(".csv") and file != current_board:
+                with open(file, 'r', newline='') as f:
+                    reader = csv.reader(f)
+                    data = list(reader)
+                    for row in data[2:]:
+                        if len(row) > 1:
+                            barcode = row[1].strip()
+                            if barcode in barcodes:
+                                return barcode
+        return None
 
 if __name__ == "__main__":
     root = tk.Tk()
