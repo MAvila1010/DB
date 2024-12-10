@@ -31,4 +31,3 @@ df = df[['LABEL_TYPECODE', 'BATCH_NUMBER', 'SERIAL_NUMBER', 'BARCODE', 'LOCATION
 
 # Write the transformed data to a new Excel file
 df.to_excel("320BC181125.xlsx", index=False)
-
